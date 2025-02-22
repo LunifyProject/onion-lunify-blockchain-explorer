@@ -55,7 +55,7 @@
     </table>
 
 
-  <h3>{{outputs_no}} output(s) for total of {{outputs_xla_sum}} xla</h3>
+  <h3>{{outputs_no}} output(s) for total of {{outputs_lfi_sum}} lfi</h3>
   <div class="center">
       <table class="center">
           <tr>
@@ -91,7 +91,7 @@
                     </h5>
                     <form action="/myoutputs" method="post" style="width:100%; margin-top:2px" class="style-1">
                         <input type="hidden" name="tx_hash" value="{{tx_hash}}"><br/>
-                        <input type="text" name="xla_address" size="110" placeholder="Lunify address/subaddress"><br/>
+                        <input type="text" name="lfi_address" size="110" placeholder="Lunify address/subaddress"><br/>
                         <input type="text" name="viewkey" size="110" placeholder="Private viewkey" style="margin-top:5px"><br/>
                         <input type="hidden" name="raw_tx_data" value="{{raw_tx_data}}">
                         <!--above raw_tx_data field only used when checking raw tx data through tx pusher-->
@@ -117,7 +117,7 @@
                        <input type="text" name="txprvkey" size="120" placeholder="Tx private key"><br/>
                         <input type="hidden" name="raw_tx_data" value="{{raw_tx_data}}">
                         <!--above raw_tx_data field only used when checking raw tx data through tx pusher-->
-                       <input type="text" name="xlaaddress" size="120" placeholder="Recipient's Lunify address/subaddress" style="margin-top:5px"><br/>
+                       <input type="text" name="lfiaddress" size="120" placeholder="Recipient's Lunify address/subaddress" style="margin-top:5px"><br/>
                        <input type="submit" value="Prove sending" style="margin-top:5px">
                     </form>
                 </div>
@@ -141,17 +141,17 @@
       </div>
     {{/enable_mixins_details}}
 
-    {{^inputs_xla_sum_not_zero}}
-        <h3>{{inputs_no}} input(s) for total of {{inputs_xla_sum}} xla</h3>
-    {{/inputs_xla_sum_not_zero}}
-    {{#inputs_xla_sum_not_zero}}
+    {{^inputs_lfi_sum_not_zero}}
+        <h3>{{inputs_no}} input(s) for total of {{inputs_lfi_sum}} lfi</h3>
+    {{/inputs_lfi_sum_not_zero}}
+    {{#inputs_lfi_sum_not_zero}}
         {{^have_any_unknown_amount}}
-            <h3>{{inputs_no}} inputs(s) for total of {{inputs_xla_sum}} xla</h3>
+            <h3>{{inputs_no}} inputs(s) for total of {{inputs_lfi_sum}} lfi</h3>
         {{/have_any_unknown_amount}}
         {{#have_any_unknown_amount}}
-            <h3>{{inputs_no}} inputs(s) for total of at least {{inputs_xla_sum}} xla</h3>
+            <h3>{{inputs_no}} inputs(s) for total of at least {{inputs_lfi_sum}} lfi</h3>
         {{/have_any_unknown_amount}}
-    {{/inputs_xla_sum_not_zero}}
+    {{/inputs_lfi_sum_not_zero}}
 
     {{#show_part_of_inputs}}
         <h5 style="margin-top: 2px">

@@ -439,15 +439,15 @@ main(int ac, const char* av[])
         map<std::string, std::string> post_body
                 = lfieg::parse_crow_post_data(req.body);
 
-        if (post_body.count("xla_address") == 0
+        if (post_body.count("lfi_address") == 0
             || post_body.count("viewkey") == 0
             || post_body.count("tx_hash") == 0)
         {
-            return string("xla address, viewkey or tx hash not provided");
+            return string("lfi address, viewkey or tx hash not provided");
         }
 
         string tx_hash     = remove_bad_chars(post_body["tx_hash"]);
-        string xla_address = remove_bad_chars(post_body["xla_address"]);
+        string lfi_address = remove_bad_chars(post_body["lfi_address"]);
         string viewkey     = remove_bad_chars(post_body["viewkey"]);
 
         // this will be only not empty when checking raw tx data
@@ -457,7 +457,7 @@ main(int ac, const char* av[])
         string domain      =  get_domain(req);
 
         string response = lfiblocks.show_my_outputs(
-                                         tx_hash, xla_address,
+                                         tx_hash, lfi_address,
                                          viewkey, raw_tx_data,
                                          domain);
 
@@ -466,14 +466,14 @@ main(int ac, const char* av[])
 
     CROW_ROUTE(app, "/myoutputs/<string>/<string>/<string>")
     ([&](const crow::request& req, string tx_hash,
-        string xla_address, string viewkey)
+        string lfi_address, string viewkey)
      {
 
         string domain = get_domain(req);
 
         return mylfi::htmlresponse(lfiblocks.show_my_outputs(
                                          remove_bad_chars(tx_hash),
-                                         remove_bad_chars(xla_address),
+                                         remove_bad_chars(lfi_address),
                                          remove_bad_chars(viewkey),
                                          string {},
                                          domain));
@@ -486,17 +486,17 @@ main(int ac, const char* av[])
             map<std::string, std::string> post_body
                     = lfieg::parse_crow_post_data(req.body);
 
-            if (post_body.count("xlaaddress") == 0
+            if (post_body.count("lfiaddress") == 0
                 || post_body.count("txprvkey") == 0
                 || post_body.count("txhash") == 0)
             {
-                return string("xla address, tx private key or "
+                return string("lfi address, tx private key or "
                                       "tx hash not provided");
             }
 
             string tx_hash     = remove_bad_chars(post_body["txhash"]);
             string tx_prv_key  = remove_bad_chars(post_body["txprvkey"]);
-            string xla_address = remove_bad_chars(post_body["xlaaddress"]);
+            string lfi_address = remove_bad_chars(post_body["lfiaddress"]);
 
             // this will be only not empty when checking raw tx data
             // using tx pusher
@@ -505,7 +505,7 @@ main(int ac, const char* av[])
             string domain      = get_domain(req);
 
             return mylfi::htmlresponse(lfiblocks.show_prove(tx_hash,
-                                        xla_address,
+                                        lfi_address,
                                         tx_prv_key,
                                         raw_tx_data,
                                         domain));
@@ -514,14 +514,14 @@ main(int ac, const char* av[])
 
     CROW_ROUTE(app, "/prove/<string>/<string>/<string>")
     ([&](const crow::request& req, string tx_hash,
-         string xla_address, string tx_prv_key) 
+         string lfi_address, string tx_prv_key) 
      {
 
         string domain = get_domain(req);
 
         return mylfi::htmlresponse(lfiblocks.show_prove(
                                     remove_bad_chars(tx_hash),
-                                    remove_bad_chars(xla_address),
+                                    remove_bad_chars(lfi_address),
                                     remove_bad_chars(tx_prv_key),
                                     string {},
                                     domain));

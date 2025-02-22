@@ -226,7 +226,7 @@ get_payment_id(const transaction& tx,
 
 
 inline double
-get_xla(uint64_t core_amount)
+get_lfi(uint64_t core_amount)
 {
     return  static_cast<double>(core_amount) / 1e12;
 }
@@ -277,7 +277,7 @@ get_tx_pub_key_from_received_outs(const transaction &tx);
 
 static
 string
-xla_amount_to_str(const uint64_t& xla_amount,
+lfi_amount_to_str(const uint64_t& lfi_amount,
                   string _format="{:0.12f}",
                   bool zero_to_question_mark=true)
 {
@@ -285,13 +285,13 @@ xla_amount_to_str(const uint64_t& xla_amount,
 
     if (!zero_to_question_mark)
     {
-        amount_str = fmt::format(_format, LFI_AMOUNT(xla_amount));
+        amount_str = fmt::format(_format, LFI_AMOUNT(lfi_amount));
     }
     else
     {
-        if (xla_amount > 0 && zero_to_question_mark == true)
+        if (lfi_amount > 0 && zero_to_question_mark == true)
         {
-            amount_str = fmt::format(_format, LFI_AMOUNT(xla_amount));
+            amount_str = fmt::format(_format, LFI_AMOUNT(lfi_amount));
         }
     }
 

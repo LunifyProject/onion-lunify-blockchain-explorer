@@ -42,8 +42,8 @@ struct MempoolStatus
         string fee_micro_str;
         string payed_for_kB_str;
         string payed_for_kB_micro_str;
-        string xla_inputs_str;
-        string xla_outputs_str;
+        string lfi_inputs_str;
+        string lfi_outputs_str;
         string timestamp_str;
         string txsize;
     };

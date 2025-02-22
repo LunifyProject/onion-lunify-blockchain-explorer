@@ -169,10 +169,10 @@ MempoolStatus::read_mempool()
         // key images of inputs
         vector<txin_to_key> input_key_imgs;
 
-        // public keys and xla amount of outputs
+        // public keys and lfi amount of outputs
         vector<output_tuple_with_tag> output_pub_keys;
 
-        // sum xla in inputs and ouputs in the given tx
+        // sum lfi in inputs and ouputs in the given tx
         const array<uint64_t, 4>& sum_data = summary_of_in_out_rct(
                tx, output_pub_keys, input_key_imgs);
 
@@ -190,12 +190,12 @@ MempoolStatus::read_mempool()
         last_tx.mixin_no          = sum_data[2];
         last_tx.num_nonrct_inputs = sum_data[3];
 
-        last_tx.fee_str          = lfieg::xla_amount_to_str(_tx_info.fee, "{:0.4f}", false);
-        last_tx.fee_micro_str    = lfieg::xla_amount_to_str(_tx_info.fee*1.0e6, "{:04.0f}", false);
+        last_tx.fee_str          = lfieg::lfi_amount_to_str(_tx_info.fee, "{:0.4f}", false);
+        last_tx.fee_micro_str    = lfieg::lfi_amount_to_str(_tx_info.fee*1.0e6, "{:04.0f}", false);
         last_tx.payed_for_kB_str = fmt::format("{:0.4f}", payed_for_kB);
         last_tx.payed_for_kB_micro_str = fmt::format("{:04.0f}", payed_for_kB*1e6);
-        last_tx.xla_inputs_str   = lfieg::xla_amount_to_str(last_tx.sum_inputs , "{:0.3f}");
-        last_tx.xla_outputs_str  = lfieg::xla_amount_to_str(last_tx.sum_outputs, "{:0.3f}");
+        last_tx.lfi_inputs_str   = lfieg::lfi_amount_to_str(last_tx.sum_inputs , "{:0.3f}");
+        last_tx.lfi_outputs_str  = lfieg::lfi_amount_to_str(last_tx.sum_outputs, "{:0.3f}");
         last_tx.timestamp_str    = lfieg::timestamp_to_str_gm(_tx_info.receive_time);
 
         last_tx.txsize           = fmt::format("{:0.2f}", tx_size);

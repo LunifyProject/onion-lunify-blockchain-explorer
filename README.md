@@ -73,7 +73,7 @@ make
 
 To run it:
 ```
-./xlablocks
+./lfiblocks
 ```
 
 By default it will look for blockchain in its default location i.e., `~/.Lunify/lmdb`.
@@ -82,13 +82,13 @@ You can use `-b` option if its in different location.
 For example:
 
 ```bash
-./xlablocks -b /home/mwo/non-default-lunify-location/lmdb/
+./lfiblocks -b /home/mwo/non-default-lunify-location/lmdb/
 ```
 
 Example output:
 
 ```bash
-[mwo@arch onion-lunify-blockchain-explorer]$ ./xlablocks
+[mwo@arch onion-lunify-blockchain-explorer]$ ./lfiblocks
 2016-May-28 10:04:49.160280 Blockchain initialized. last block: 1056761, d0.h0.m12.s47 time ago, current difficulty: 1517857750
 (2016-05-28 02:04:49) [INFO    ] Crow/0.1 server is running, local port 8081
 ```
@@ -102,13 +102,13 @@ against latest release (`release-v0.17`) branch of Lunify:
 
 ```
 # build using all CPU cores
-docker build --no-cache -t xlablocks .
+docker build --no-cache -t lfiblocks .
 
 # alternatively, specify number of cores to use (e.g. 2)
-docker build --no-cache --build-arg NPROC=2  -t xlablocks .
+docker build --no-cache --build-arg NPROC=2  -t lfiblocks .
 
 # to build against development branch of lunify (i.e. master branch)
-docker build --no-cache --build-arg NPROC=3 --build-arg LUNIFY_BRANCH=master  -t xlablocks .
+docker build --no-cache --build-arg NPROC=3 --build-arg LUNIFY_BRANCH=master  -t lfiblocks .
 ```
 
 - The build needs 3 GB space.
@@ -118,16 +118,16 @@ To run it, mount the lunify blockchain onto the container as volume.
 
 ```
 # either run in foreground
-docker run -it -v <path-to-lunify-blockckain-on-the-host>:/home/lunify/.Lunify -p 8081:8081  xlablocks
+docker run -it -v <path-to-lunify-blockckain-on-the-host>:/home/lunify/.Lunify -p 8081:8081  lfiblocks
 
 # or in background
-docker run -it -d -v <path-to-lunify-blockchain-on-the-host>:/home/lunify/.Lunify -p 8081:8081  xlablocks
+docker run -it -d -v <path-to-lunify-blockchain-on-the-host>:/home/lunify/.Lunify -p 8081:8081  lfiblocks
 ```
 
 Example output:
 
 ```
-docker run --rm -it -v /mnt/w7/Lunify:/home/lunify/.Lunify -p 8081:8081 xlablocks
+docker run --rm -it -v /mnt/w7/Lunify:/home/lunify/.Lunify -p 8081:8081 lfiblocks
 Staring in non-ssl mode
 (2020-04-20 16:20:00) [INFO    ] Crow/0.1 server is running at 0.0.0.0:8081 using 1 threads
 ```
@@ -144,7 +144,7 @@ services:
     restart: unless-stopped
     container_name: lunifyd
     volumes:
-      - xladata:/home/lunify/.Lunify
+      - lfidata:/home/lunify/.Lunify
     ports:
       - 18080:18080
       - 18089:18089
@@ -157,18 +157,18 @@ services:
       - "--prune-blockchain"
 
   explore:
-    image: xlablocks:latest
+    image: lfiblocks:latest
     build: ./onion-lunify-blockchain-explorer
     container_name: explore
     restart: unless-stopped
     volumes:
-      - xladata:/home/lunify/.Lunify
+      - lfidata:/home/lunify/.Lunify
     ports:
       - 8081:8081
-    command: ["./xlablocks --daemon-url=lunifyd:18089 --enable-json-api --enable-autorefresh-option --enable-emission-monitor --enable-pusher"]
+    command: ["./lfiblocks --daemon-url=lunifyd:18089 --enable-json-api --enable-autorefresh-option --enable-emission-monitor --enable-pusher"]
 
   volumes:
-    xladata:
+    lfidata:
 ```
 
 To build this image, run the following:
@@ -191,7 +191,7 @@ When running via Docker, please use something like [Traefik](https://doc.traefik
 ## The explorer's command line options
 
 ```
-xlablocks, Onion Lunify Blockchain Explorer:
+lfiblocks, Onion Lunify Blockchain Explorer:
   -h [ --help ] [=arg(=1)] (=0)         produce help message
   -t [ --testnet ] [=arg(=1)] (=0)      use testnet blockchain
   -s [ --stagenet ] [=arg(=1)] (=0)     use stagenet blockchain
@@ -250,23 +250,23 @@ Example usage, defined as bash aliases.
 
 ```bash
 # for mainnet explorer
-alias xlablocksmainnet='~/onion-lunify-blockchain-explorer/build/xlablocks    --port 8081 --testnet-url "http://139.162.32.245:8082" --enable-pusher --enable-emission-monitor'
+alias lfiblocksmainnet='~/onion-lunify-blockchain-explorer/build/lfiblocks    --port 8081 --testnet-url "http://139.162.32.245:8082" --enable-pusher --enable-emission-monitor'
 
 # for testnet explorer
-alias xlablockstestnet='~/onion-lunify-blockchain-explorer/build/xlablocks -t --port 8082 --mainnet-url "http://139.162.32.245:8081" --enable-pusher --enable-emission-monitor'
+alias lfiblockstestnet='~/onion-lunify-blockchain-explorer/build/lfiblocks -t --port 8082 --mainnet-url "http://139.162.32.245:8081" --enable-pusher --enable-emission-monitor'
 ```
 
 Example usage when running via Docker:
 
 ```bash
 # Run in foreground
-docker run -it -v <path-to-lunify-blockckain-on-the-host>:/home/lunify/.Lunify -p 8081:8081  xlablocks "./xlablocks --daemon-url=node.sethforprivacy.com:18089 --enable-json-api --enable-autorefresh-option --enable-emission-monitor --enable-pusher"
+docker run -it -v <path-to-lunify-blockckain-on-the-host>:/home/lunify/.Lunify -p 8081:8081  lfiblocks "./lfiblocks --daemon-url=node.sethforprivacy.com:18089 --enable-json-api --enable-autorefresh-option --enable-emission-monitor --enable-pusher"
 
 # Run in background
-docker run -it -d -v <path-to-lunify-blockchain-on-the-host>:/home/lunify/.Lunify -p 8081:8081  xlablocks "./xlablocks --daemon-url=node.sethforprivacy.com:18089 --enable-json-api --enable-autorefresh-option --enable-emission-monitor --enable-pusher"
+docker run -it -d -v <path-to-lunify-blockchain-on-the-host>:/home/lunify/.Lunify -p 8081:8081  lfiblocks "./lfiblocks --daemon-url=node.sethforprivacy.com:18089 --enable-json-api --enable-autorefresh-option --enable-emission-monitor --enable-pusher"
 ```
 
-Make sure to always start the portion of command line flags with `./xlablocks` and set any flags you would like after that, as shown above.
+Make sure to always start the portion of command line flags with `./lfiblocks` and set any flags you would like after that, as shown above.
 
 ## Enable Lunify emission
 
@@ -275,7 +275,7 @@ disabled. To enable it use `--enable-emission-monitor` flag, e.g.,
 
 
 ```bash
-xlablocks --enable-emission-monitor
+lfiblocks --enable-emission-monitor
 ```
 
 This flag will enable emission monitoring thread. When started, the thread
@@ -320,10 +320,10 @@ openssl req -new -key server.key -out server.csr
 openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
 ```
 
-Having the `crt` and `key` files, run `xlablocks` in the following way:
+Having the `crt` and `key` files, run `lfiblocks` in the following way:
 
 ```bash
-./xlablocks --ssl-crt-file=/tmp/server.crt --ssl-key-file=/tmp/server.key
+./lfiblocks --ssl-crt-file=/tmp/server.crt --ssl-key-file=/tmp/server.key
 ```
 
 Note: Because we generated our own certificate, modern browsers will complain
@@ -336,7 +336,7 @@ The explorer has JSON api. For the API, it uses conventions defined by [JSend](h
 By default the api is disabled. To enable it, use `--enable-json-api` flag, e.g.,
 
 ```
-./xlablocks --enable-json-api
+./lfiblocks --enable-json-api
 ```
 
 #### api/transaction/<tx_hash>
@@ -393,8 +393,8 @@ Partial results shown:
     "tx_hash": "6093260dbe79fd6277694d14789dc8718f1bd54457df8bab338c2efa3bb0f03d",
     "tx_size": 13323,
     "tx_version": 2,
-    "xla_inputs": 0,
-    "xla_outputs": 0
+    "lfi_inputs": 0,
+    "lfi_outputs": 0
   },
   "status": "success"
 }
@@ -493,8 +493,8 @@ Partial results shown:
         "tx_hash": "3ff71b65bec34c9261e01a856e6a03594cf0472acf6b77db3f17ebd18eaa30bf",
         "tx_size": 95,
         "tx_version": 2,
-        "xla_inputs": 0,
-        "xla_outputs": 8025365394426
+        "lfi_inputs": 0,
+        "lfi_outputs": 8025365394426
       }
     ]
   },
@@ -532,8 +532,8 @@ Partial results shown:
         "tx_hash": "9f3374f8ac67febaab153eab297937a3d0d2c706601e496bf5028146da0c9aef",
         "tx_size": 13291,
         "tx_version": 2,
-        "xla_inputs": 0,
-        "xla_outputs": 0
+        "lfi_inputs": 0,
+        "lfi_outputs": 0
       }
     ],
     "txs_no": 7
@@ -585,8 +585,8 @@ Partial results shown:
         "tx_hash": "479ba432f5c88736b438dd4446a11a13046a752d469f7828151f5c5b86be4e9a",
         "tx_size": 95,
         "tx_version": 2,
-        "xla_inputs": 0,
-        "xla_outputs": 7992697599717
+        "lfi_inputs": 0,
+        "lfi_outputs": 7992697599717
       }
     ]
   },
@@ -637,7 +637,7 @@ curl  -w "\n" -X GET "http://127.0.0.1:8081/api/outputs?txhash=17049bc5f2d9fbca1
 
 Proving transfer:
 
-We use recipient's address (i.e. not our address from which we sent xla to recipient).
+We use recipient's address (i.e. not our address from which we sent lfi to recipient).
 For the viewkey, we use `tx_private_key` (although the GET variable is still called `viewkey`) that we obtained by sending this txs.
 
 ```bash

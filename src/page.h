@@ -312,8 +312,8 @@ struct tx_details
     crypto::hash prefix_hash;
     crypto::public_key pk;
     std::vector<crypto::public_key> additional_pks;
-    uint64_t xla_inputs;
-    uint64_t xla_outputs;
+    uint64_t lfi_inputs;
+    uint64_t lfi_outputs;
     uint64_t num_nonrct_inputs;
     uint64_t fee;
     uint64_t mixin_no;
@@ -335,7 +335,7 @@ struct tx_details
     // key images of inputs
     vector<txin_to_key> input_key_imgs;
 
-    // public keys and xla amount of outputs
+    // public keys and lfi amount of outputs
     vector<output_tuple_with_tag> output_pub_keys;
 
     mstch::map
@@ -349,7 +349,7 @@ struct tx_details
         string fee_micro_str {"N/A"};
         string payed_for_kB_micro_str {""};
 
-        const double& xla_amount = LFI_AMOUNT(fee);
+        const double& lfi_amount = LFI_AMOUNT(fee);
 
         // tx size in kB
         double tx_size =  static_cast<double>(size)/1024.0;
@@ -357,12 +357,12 @@ struct tx_details
 
         if (!input_key_imgs.empty())
         {
-            double payed_for_kB = xla_amount / tx_size;
+            double payed_for_kB = lfi_amount / tx_size;
 
             mixin_str        = std::to_string(mixin_no);
-            fee_str          = fmt::format("{:0.6f}", xla_amount);
-            fee_short_str    = fmt::format("{:0.4f}", xla_amount);
-            fee_micro_str    = fmt::format("{:04.0f}" , xla_amount * 1e6);
+            fee_str          = fmt::format("{:0.6f}", lfi_amount);
+            fee_short_str    = fmt::format("{:0.4f}", lfi_amount);
+            fee_micro_str    = fmt::format("{:04.0f}" , lfi_amount * 1e6);
             payed_for_kB_str = fmt::format("{:0.4f}", payed_for_kB);
             payed_for_kB_micro_str = fmt::format("{:04.0f}", payed_for_kB * 1e6);
         }
@@ -377,10 +377,10 @@ struct tx_details
                 {"fee_micro"         , fee_micro_str},
                 {"payed_for_kB"      , payed_for_kB_str},
                 {"payed_for_kB_micro", payed_for_kB_micro_str},
-                {"sum_inputs"        , xla_amount_to_str(xla_inputs , "{:0.6f}")},
-                {"sum_outputs"       , xla_amount_to_str(xla_outputs, "{:0.6f}")},
-                {"sum_inputs_short"  , xla_amount_to_str(xla_inputs , "{:0.3f}")},
-                {"sum_outputs_short" , xla_amount_to_str(xla_outputs, "{:0.3f}")},
+                {"sum_inputs"        , lfi_amount_to_str(lfi_inputs , "{:0.6f}")},
+                {"sum_outputs"       , lfi_amount_to_str(lfi_outputs, "{:0.6f}")},
+                {"sum_inputs_short"  , lfi_amount_to_str(lfi_inputs , "{:0.3f}")},
+                {"sum_outputs_short" , lfi_amount_to_str(lfi_outputs, "{:0.3f}")},
                 {"no_inputs"         , static_cast<uint64_t>(input_key_imgs.size())},
                 {"no_outputs"        , static_cast<uint64_t>(output_pub_keys.size())},
                 {"no_nonrct_inputs"  , num_nonrct_inputs},
@@ -809,8 +809,8 @@ index2(uint64_t page_no = 0, bool refresh_page = false)
                 = CurrentBlockchainStatus::get_emission();
 
         string emission_blk_no   = std::to_string(current_values.blk_no - 1);
-        string emission_coinbase = xla_amount_to_str(current_values.coinbase, "{:0.3f}");
-        string emission_fee      = xla_amount_to_str(current_values.fee, "{:0.3f}");
+        string emission_coinbase = lfi_amount_to_str(current_values.coinbase, "{:0.3f}");
+        string emission_fee      = lfi_amount_to_str(current_values.fee, "{:0.3f}");
 
         context["emission"] = mstch::map {
                 {"blk_no"    , emission_blk_no},
@@ -916,8 +916,8 @@ mempool(bool add_header_and_footer = false, uint64_t no_of_mempool_tx = 25)
                 {"hash"            , pod_to_hex(mempool_tx.tx_hash)},
                 {"fee"             , mempool_tx.fee_micro_str},
                 {"payed_for_kB"    , mempool_tx.payed_for_kB_micro_str},
-                {"xla_inputs"      , mempool_tx.xla_inputs_str},
-                {"xla_outputs"     , mempool_tx.xla_outputs_str},
+                {"lfi_inputs"      , mempool_tx.lfi_inputs_str},
+                {"lfi_outputs"     , mempool_tx.lfi_outputs_str},
                 {"no_inputs"       , mempool_tx.no_inputs},
                 {"no_outputs"      , mempool_tx.no_outputs},
                 {"no_nonrct_inputs", mempool_tx.num_nonrct_inputs},
@@ -1186,11 +1186,11 @@ show_block(uint64_t _blk_height)
 
     // add total fees in the block to the context
     context["sum_fees"]
-            = lfieg::xla_amount_to_str(sum_fees, "{:0.6f}", false);
+            = lfieg::lfi_amount_to_str(sum_fees, "{:0.6f}", false);
 
-    // get xla in the block reward
+    // get lfi in the block reward
     context["blk_reward"]
-            = lfieg::xla_amount_to_str(txd_coinbase.xla_outputs - sum_fees, "{:0.6f}");
+            = lfieg::lfi_amount_to_str(txd_coinbase.lfi_outputs - sum_fees, "{:0.6f}");
 
     add_css_style(context);
 
@@ -1878,7 +1878,7 @@ show_ringmemberstx_jsonhex(string const& tx_hash_str)
 
 string
 show_my_outputs(string tx_hash_str,
-                string xla_address_str,
+                string lfi_address_str,
                 string viewkey_str, /* or tx_prv_key_str when tx_prove == true */
                 string raw_tx_data,
                 string domain,
@@ -1887,7 +1887,7 @@ show_my_outputs(string tx_hash_str,
 
     // remove white characters
     boost::trim(tx_hash_str);
-    boost::trim(xla_address_str);
+    boost::trim(lfi_address_str);
     boost::trim(viewkey_str);
     boost::trim(raw_tx_data);
 
@@ -1898,7 +1898,7 @@ show_my_outputs(string tx_hash_str,
         return string("tx hash not provided!");
     }
 
-    if (xla_address_str.empty())
+    if (lfi_address_str.empty())
     {
         return string("Lunify address not provided!");
     }
@@ -1923,10 +1923,10 @@ show_my_outputs(string tx_hash_str,
     // parse string representing given Lunify address
     cryptonote::address_parse_info address_info;
 
-    if (!lfieg::parse_str_address(xla_address_str,  address_info, nettype))
+    if (!lfieg::parse_str_address(lfi_address_str,  address_info, nettype))
     {
-        cerr << "Cant parse string address: " << xla_address_str << endl;
-        return string("Cant parse xla address: " + xla_address_str);
+        cerr << "Cant parse string address: " << lfi_address_str << endl;
+        return string("Cant parse lfi address: " + lfi_address_str);
     }
 
     // parse string representing given private key
@@ -2081,7 +2081,7 @@ show_my_outputs(string tx_hash_str,
     string shortcut_url = tx_prove 
                     ? string("/prove") : string("/myoutputs")
                           + '/' + tx_hash_str
-                          + '/' + xla_address_str
+                          + '/' + lfi_address_str
                           + '/' + viewkey_str;
 
 
@@ -2097,13 +2097,13 @@ show_my_outputs(string tx_hash_str,
             {"stagenet"             , stagenet},
             {"tx_hash"              , tx_hash_str},
             {"tx_prefix_hash"       , pod_to_hex(txd.prefix_hash)},
-            {"xla_address"          , xla_address_str},
+            {"lfi_address"          , lfi_address_str},
             {"viewkey"              , viewkey_str_partial},
             {"tx_pub_key"           , pod_to_hex(txd.pk)},
             {"blk_height"           , tx_blk_height_str},
             {"tx_size"              , fmt::format("{:0.4f}",
                                                   static_cast<double>(txd.size) / 1024.0)},
-            {"tx_fee"               , lfieg::xla_amount_to_str(txd.fee, "{:0.12f}", true)},
+            {"tx_fee"               , lfieg::lfi_amount_to_str(txd.fee, "{:0.12f}", true)},
             {"blk_timestamp"        , blk_timestamp},
             {"delta_time"           , age.first},
             {"outputs_no"           , static_cast<uint64_t>(txd.output_pub_keys.size())},
@@ -2169,7 +2169,7 @@ show_my_outputs(string tx_hash_str,
 
     mstch::array outputs;
 
-    uint64_t sum_xla {0};
+    uint64_t sum_lfi {0};
 
     std::vector<uint64_t> money_transfered(tx.vout.size(), 0);
 
@@ -2182,7 +2182,7 @@ show_my_outputs(string tx_hash_str,
 
         // get the tx output public key
         // that normally would be generated for us,
-        // if someone had sent us some xla.
+        // if someone had sent us some lfi.
         public_key tx_pubkey;
 
         derive_public_key(derivation,
@@ -2217,7 +2217,7 @@ show_my_outputs(string tx_hash_str,
             with_additional = true;
         }
 
-        uint64_t xla_amount = std::get<1>(outp);
+        uint64_t lfi_amount = std::get<1>(outp);
 
         // if mine output has RingCT, i.e., tx version is 2
         if (mine_output && tx.version == 2)
@@ -2254,7 +2254,7 @@ show_my_outputs(string tx_hash_str,
 
 //                cout << derived_view_tag << endl;
 
-                xla_amount = rct_amount;
+                lfi_amount = rct_amount;
                 money_transfered[output_idx] = rct_amount;
             }
 
@@ -2262,12 +2262,12 @@ show_my_outputs(string tx_hash_str,
 
         if (mine_output)
         {
-            sum_xla += xla_amount;
+            sum_lfi += lfi_amount;
         }
 
         outputs.push_back(mstch::map {
                 {"out_pub_key"           , pod_to_hex(std::get<0>(outp))},
-                {"amount"                , lfieg::xla_amount_to_str(xla_amount)},
+                {"amount"                , lfieg::lfi_amount_to_str(lfi_amount)},
                 {"mine_output"           , mine_output},
                 {"output_idx"            , fmt::format("{:02d}", output_idx)}
         });
@@ -2278,8 +2278,8 @@ show_my_outputs(string tx_hash_str,
 
     context.emplace("outputs", outputs);
 
-    context["found_our_outputs"] = (sum_xla > 0);
-    context["sum_xla"]           = lfieg::xla_amount_to_str(sum_xla);
+    context["found_our_outputs"] = (sum_lfi > 0);
+    context["sum_lfi"]           = lfieg::lfi_amount_to_str(sum_lfi);
 
     // we can also test ouputs used in mixins for key images
     // this can show possible spending. Only possible, because
@@ -2295,16 +2295,16 @@ show_my_outputs(string tx_hash_str,
 
         vector<txin_to_key> input_key_imgs = lfieg::get_key_images(tx);
 
-        // to hold sum of xla in matched mixins, those that
+        // to hold sum of lfi in matched mixins, those that
         // perfectly match mixin public key with outputs in mixn_tx.
-        uint64_t sum_mixin_xla {0};
+        uint64_t sum_mixin_lfi {0};
 
         // this is used for the final check. we assument that number of
         // parefct matches must be equal to number of inputs in a tx.
         uint64_t no_of_matched_mixins {0};
 
         // Hold all possible mixins that we found. This is only used so that
-        // we get number of all posibilities, and their total xla amount
+        // we get number of all posibilities, and their total lfi amount
         // (useful for unit testing)
         //                     public_key    , amount
         std::vector<std::pair<crypto::public_key, uint64_t>> all_possible_mixins;
@@ -2345,7 +2345,7 @@ show_my_outputs(string tx_hash_str,
 
             inputs.push_back(mstch::map{
                     {"key_image"       , pod_to_hex(in_key.k_image)},
-                    {"key_image_amount", lfieg::xla_amount_to_str(in_key.amount)},
+                    {"key_image_amount", lfieg::lfi_amount_to_str(in_key.amount)},
                     make_pair(string("mixins"), mstch::array{})
             });
 
@@ -2508,7 +2508,7 @@ show_my_outputs(string tx_hash_str,
 
                     // get the tx output public key
                     // that normally would be generated for us,
-                    // if someone had sent us some xla.
+                    // if someone had sent us some lfi.
                     public_key tx_pubkey_generated;
 
                     derive_public_key(derivation,
@@ -2581,7 +2581,7 @@ show_my_outputs(string tx_hash_str,
                             {"out_idx"         , output_idx_in_tx},
                             {"formed_output_pk", out_pub_key_str},
                             {"out_in_match"    , output_match},
-                            {"amount"          , lfieg::xla_amount_to_str(amount)}
+                            {"amount"          , lfieg::lfi_amount_to_str(amount)}
                     });
 
                     //cout << "output_pub_key == output_data.pubkey" << endl;
@@ -2591,7 +2591,7 @@ show_my_outputs(string tx_hash_str,
                         found_something = true;
                         show_key_images = true;
 
-                        // increase sum_mixin_xla only when
+                        // increase sum_mixin_lfi only when
                         // public key of an outputs used in ring signature,
                         // matches a public key in a mixin_tx
                         if (output_pub_key != output_data.pubkey)
@@ -2608,11 +2608,11 @@ show_my_outputs(string tx_hash_str,
                             // in amounts, not only in output public keys
                             if (mixin_tx.version < 2 && amount == in_key.amount)
                             {
-                                sum_mixin_xla += amount;
+                                sum_mixin_lfi += amount;
                             }
                             else if (mixin_tx.version == 2) // ringct
                             {
-                                sum_mixin_xla += amount;
+                                sum_mixin_lfi += amount;
                                 ringct_amount += amount;
                             }
 
@@ -2671,15 +2671,15 @@ show_my_outputs(string tx_hash_str,
 
         context["show_inputs"]   = show_key_images;
         context["inputs_no"]     = static_cast<uint64_t>(inputs.size());
-        context["sum_mixin_xla"] = lfieg::xla_amount_to_str(
-                sum_mixin_xla, "{:0.12f}", false);
+        context["sum_mixin_lfi"] = lfieg::lfi_amount_to_str(
+                sum_mixin_lfi, "{:0.12f}", false);
 
 
         uint64_t possible_spending  {0};
 
         //cout << "\nall_possible_mixins: " << all_possible_mixins.size() << '\n';
 
-        // useful for unit testing as it provides total xla sum
+        // useful for unit testing as it provides total lfi sum
         // of possible mixins
         uint64_t all_possible_mixins_amount1  {0};
 
@@ -2697,14 +2697,14 @@ show_my_outputs(string tx_hash_str,
         // show spending only if sum of mixins is more than
         // what we get + fee, and number of perferctly matched
         // mixis is equal to number of inputs
-        if (sum_mixin_xla > (sum_xla + txd.fee)
+        if (sum_mixin_lfi > (sum_lfi + txd.fee)
             && no_of_matched_mixins == inputs.size())
         {
             //                  (outcoming    - incoming) - fee
-            possible_spending = (sum_mixin_xla - sum_xla) - txd.fee;
+            possible_spending = (sum_mixin_lfi - sum_lfi) - txd.fee;
         }
 
-        context["possible_spending"] = lfieg::xla_amount_to_str(
+        context["possible_spending"] = lfieg::lfi_amount_to_str(
                 possible_spending, "{:0.12f}", false);
 
     } // if (enable_mixin_guess)
@@ -2717,13 +2717,13 @@ show_my_outputs(string tx_hash_str,
 
 string
 show_prove(string tx_hash_str,
-           string xla_address_str,
+           string lfi_address_str,
            string tx_prv_key_str,
            string const& raw_tx_data,
            string domain)
 {
 
-    return show_my_outputs(tx_hash_str, xla_address_str,
+    return show_my_outputs(tx_hash_str, lfi_address_str,
                            tx_prv_key_str, raw_tx_data,
                            domain, true);
 }
@@ -2827,7 +2827,7 @@ show_checkrawtx(string raw_tx_data, string action)
                 mstch::map tx_cd_data {
                         {"no_of_sources"      , static_cast<uint64_t>(no_of_sources)},
                         {"use_rct"            , tx_cd.use_rct},
-                        {"change_amount"      , lfieg::xla_amount_to_str(tx_change.amount)},
+                        {"change_amount"      , lfieg::lfi_amount_to_str(tx_change.amount)},
                         {"has_payment_id"     , (payment_id  != null_hash)},
                         {"has_payment_id8"    , (payment_id8 != null_hash8)},
                         {"payment_id"         , pid_str},
@@ -2844,7 +2844,7 @@ show_checkrawtx(string raw_tx_data, string action)
                     mstch::map dest_info {
                             {"dest_address"  , get_account_address_as_str(
                                     nettype, a_dest.is_subaddress, a_dest.addr)},
-                            {"dest_amount"   , lfieg::xla_amount_to_str(a_dest.amount)}
+                            {"dest_amount"   , lfieg::lfi_amount_to_str(a_dest.amount)}
                     };
 
                     dest_infos.push_back(dest_info);
@@ -2861,7 +2861,7 @@ show_checkrawtx(string raw_tx_data, string action)
                     const tx_source_entry&  tx_source = tx_cd.sources.at(i);
 
                     mstch::map single_dest_source {
-                            {"output_amount"              , lfieg::xla_amount_to_str(tx_source.amount)},
+                            {"output_amount"              , lfieg::lfi_amount_to_str(tx_source.amount)},
                             {"real_output"                , static_cast<uint64_t>(tx_source.real_output)},
                             {"real_out_tx_key"            , pod_to_hex(tx_source.real_out_tx_key)},
                             {"real_output_in_tx_index"    , static_cast<uint64_t>(tx_source.real_output_in_tx_index)},
@@ -3003,7 +3003,7 @@ show_checkrawtx(string raw_tx_data, string action)
                 } //  for (size_t i = 0; i < no_of_sources; ++i)
 
                 tx_cd_data.insert({"sum_outputs_amounts" ,
-                                   lfieg::xla_amount_to_str(sum_outputs_amounts)});
+                                   lfieg::lfi_amount_to_str(sum_outputs_amounts)});
 
 
                 uint64_t min_mix_timestamp;
@@ -3175,7 +3175,7 @@ show_checkrawtx(string raw_tx_data, string action)
 
             mstch::array destination_addresses;
             vector<uint64_t> real_ammounts;
-            uint64_t outputs_xla_sum {0};
+            uint64_t outputs_lfi_sum {0};
 
             // destiantion address for this tx
             for (tx_destination_entry& a_dest: ptx.construction_data.splitted_dsts)
@@ -3188,12 +3188,12 @@ show_checkrawtx(string raw_tx_data, string action)
                         mstch::map {
                                 {"dest_address"   , get_account_address_as_str(
                                         nettype, a_dest.is_subaddress, a_dest.addr)},
-                                {"dest_amount"    , lfieg::xla_amount_to_str(a_dest.amount)},
+                                {"dest_amount"    , lfieg::lfi_amount_to_str(a_dest.amount)},
                                 {"is_this_change" , false}
                         }
                 );
 
-                outputs_xla_sum += a_dest.amount;
+                outputs_lfi_sum += a_dest.amount;
 
                 real_ammounts.push_back(a_dest.amount);
             }
@@ -3206,7 +3206,7 @@ show_checkrawtx(string raw_tx_data, string action)
                                 {"dest_address"   , get_account_address_as_str(
                                         nettype, ptx.construction_data.change_dts.is_subaddress, ptx.construction_data.change_dts.addr)},
                                 {"dest_amount"    ,
-                                        lfieg::xla_amount_to_str(ptx.construction_data.change_dts.amount)},
+                                        lfieg::lfi_amount_to_str(ptx.construction_data.change_dts.amount)},
                                 {"is_this_change" , true}
                         }
                 );
@@ -3214,7 +3214,7 @@ show_checkrawtx(string raw_tx_data, string action)
                 real_ammounts.push_back(ptx.construction_data.change_dts.amount);
             };
 
-            tx_context["outputs_xla_sum"] = lfieg::xla_amount_to_str(outputs_xla_sum);
+            tx_context["outputs_lfi_sum"] = lfieg::lfi_amount_to_str(outputs_lfi_sum);
 
             tx_context.insert({"dest_infos", destination_addresses});
 
@@ -3238,7 +3238,7 @@ show_checkrawtx(string raw_tx_data, string action)
                 {
                     if (output_amount == 0)
                     {
-                        out_amount_str = lfieg::xla_amount_to_str(real_ammounts.at(i));
+                        out_amount_str = lfieg::lfi_amount_to_str(real_ammounts.at(i));
                     }
                 }
             }
@@ -3248,7 +3248,7 @@ show_checkrawtx(string raw_tx_data, string action)
             vector<uint64_t> real_output_indices;
             vector<uint64_t> real_amounts;
 
-            uint64_t inputs_xla_sum {0};
+            uint64_t inputs_lfi_sum {0};
 
             for (const tx_source_entry&  tx_source: ptx.construction_data.sources)
             {
@@ -3297,14 +3297,14 @@ show_checkrawtx(string raw_tx_data, string action)
                 real_output_indices.push_back(tx_source.real_output);
                 real_amounts.push_back(tx_source.amount);
 
-                inputs_xla_sum += tx_source.amount;
+                inputs_lfi_sum += tx_source.amount;
             }
 
             // mark that we have signed tx data for use in mstch
             tx_context["have_raw_tx"] = true;
 
-            // provide total mount of inputs xla
-            tx_context["inputs_xla_sum"] = lfieg::xla_amount_to_str(inputs_xla_sum);
+            // provide total mount of inputs lfi
+            tx_context["inputs_lfi_sum"] = lfieg::lfi_amount_to_str(inputs_lfi_sum);
 
             // get reference to inputs array created of the tx
             mstch::array& inputs = boost::get<mstch::array>(tx_context["inputs"]);
@@ -3322,7 +3322,7 @@ show_checkrawtx(string raw_tx_data, string action)
                         boost::get<mstch::map>(input_node)["amount"]
                 );
 
-                amount = lfieg::xla_amount_to_str(real_amounts.at(input_idx));
+                amount = lfieg::lfi_amount_to_str(real_amounts.at(input_idx));
 
                 // check if key images are spend or not
 
@@ -3711,18 +3711,18 @@ show_checkrawkeyimgs(string raw_data, string viewkey_str)
 
     }
 
-    // get xla address stored in this key image file
-    const account_public_address* xla_address =
+    // get lfi address stored in this key image file
+    const account_public_address* lfi_address =
             reinterpret_cast<const account_public_address*>(
                     decoded_raw_data.data());
 
-    address_parse_info address_info {*xla_address, false};
+    address_parse_info address_info {*lfi_address, false};
 
 
     context.insert({"address"        , REMOVE_HASH_BRAKETS(
             lfieg::print_address(address_info, nettype))});
-    context.insert({"has_total_xla"  , false});
-    context.insert({"total_xla"      , string{}});
+    context.insert({"has_total_lfi"  , false});
+    context.insert({"total_lfi"      , string{}});
     context.insert({"key_imgs"       , mstch::array{}});
 
 
@@ -3844,18 +3844,18 @@ show_checkcheckrawoutput(string raw_data, string viewkey_str)
     // header is public spend and keys
     const size_t header_lenght    = 2 * sizeof(crypto::public_key);
 
-    // get xla address stored in this key image file
-    const account_public_address* xla_address =
+    // get lfi address stored in this key image file
+    const account_public_address* lfi_address =
             reinterpret_cast<const account_public_address*>(
                     decoded_raw_data.data());
 
-    address_parse_info address_info {*xla_address, false, false, crypto::null_hash8};
+    address_parse_info address_info {*lfi_address, false, false, crypto::null_hash8};
 
     context.insert({"address"        , REMOVE_HASH_BRAKETS(
             lfieg::print_address(address_info, nettype))});
     context.insert({"viewkey"        , pod_to_hex(unwrap(unwrap(prv_view_key)))});
-    context.insert({"has_total_xla"  , false});
-    context.insert({"total_xla"      , string{}});
+    context.insert({"has_total_lfi"  , false});
+    context.insert({"total_lfi"      , string{}});
     context.insert({"output_keys"    , mstch::array{}});
 
     mstch::array& output_keys_ctx = boost::get<mstch::array>(context["output_keys"]);
@@ -3885,7 +3885,7 @@ show_checkcheckrawoutput(string raw_data, string viewkey_str)
         return mstch::render(full_page, context);
     }
 
-    uint64_t total_xla {0};
+    uint64_t total_lfi {0};
     uint64_t output_no {0};
 
     context["are_key_images_known"] = false;
@@ -3897,7 +3897,7 @@ show_checkcheckrawoutput(string raw_data, string viewkey_str)
 
         public_key output_pub_key = td.get_public_key();
 
-        uint64_t xla_amount = td.amount();
+        uint64_t lfi_amount = td.amount();
 
         // if the output is RingCT, i.e., tx version is 2
         // need to decode its amount
@@ -3929,13 +3929,13 @@ show_checkcheckrawoutput(string raw_data, string viewkey_str)
                                        prv_view_key,
                                        td.m_internal_output_index,
                                        tx.rct_signatures.ecdhInfo[td.m_internal_output_index].mask,
-                                       xla_amount);
+                                       lfi_amount);
                 r = r || decode_ringct(tx.rct_signatures,
                                        additional_tx_pub_keys[td.m_internal_output_index],
                                        prv_view_key,
                                        td.m_internal_output_index,
                                        tx.rct_signatures.ecdhInfo[td.m_internal_output_index].mask,
-                                       xla_amount);
+                                       lfi_amount);
 
                 if (!r)
                 {
@@ -3974,7 +3974,7 @@ show_checkcheckrawoutput(string raw_data, string viewkey_str)
         mstch::map output_info {
                 {"output_no"           , fmt::format("{:03d}", output_no)},
                 {"output_pub_key"      , REMOVE_HASH_BRAKETS(fmt::format("{:s}", output_pub_key))},
-                {"amount"              , lfieg::xla_amount_to_str(xla_amount)},
+                {"amount"              , lfieg::lfi_amount_to_str(lfi_amount)},
                 {"tx_hash"             , REMOVE_HASH_BRAKETS(fmt::format("{:s}", td.m_txid))},
                 {"timestamp"           , lfieg::timestamp_to_str_gm(blk_timestamp)},
                 {"is_spent"            , is_output_spent},
@@ -3985,16 +3985,16 @@ show_checkcheckrawoutput(string raw_data, string viewkey_str)
 
         if (!is_output_spent)
         {
-            total_xla += xla_amount;
+            total_lfi += lfi_amount;
         }
 
         output_keys_ctx.push_back(output_info);
     }
 
-    if (total_xla > 0)
+    if (total_lfi > 0)
     {
-        context["has_total_xla"] = true;
-        context["total_xla"] = lfieg::xla_amount_to_str(total_xla);
+        context["has_total_lfi"] = true;
+        context["total_lfi"] = lfieg::lfi_amount_to_str(total_lfi);
     }
 
     return mstch::render(full_page, context);;
@@ -4125,7 +4125,7 @@ show_address_details(const address_parse_info& address_info, cryptonote::network
     string pub_spendkey_str = fmt::format("{:s}", address_info.address.m_spend_public_key);
 
     mstch::map context {
-            {"xla_address"        , REMOVE_HASH_BRAKETS(address_str)},
+            {"lfi_address"        , REMOVE_HASH_BRAKETS(address_str)},
             {"public_viewkey"     , REMOVE_HASH_BRAKETS(pub_viewkey_str)},
             {"public_spendkey"    , REMOVE_HASH_BRAKETS(pub_spendkey_str)},
             {"is_integrated_addr" , false},
@@ -4152,7 +4152,7 @@ show_integrated_address_details(const address_parse_info& address_info,
     string enc_payment_id_str = fmt::format("{:s}", encrypted_payment_id);
 
     mstch::map context {
-            {"xla_address"          , REMOVE_HASH_BRAKETS(address_str)},
+            {"lfi_address"          , REMOVE_HASH_BRAKETS(address_str)},
             {"public_viewkey"       , REMOVE_HASH_BRAKETS(pub_viewkey_str)},
             {"public_spendkey"      , REMOVE_HASH_BRAKETS(pub_spendkey_str)},
             {"encrypted_payment_id" , REMOVE_HASH_BRAKETS(enc_payment_id_str)},
@@ -4689,7 +4689,7 @@ json_detailedtransaction(string tx_hash_str)
     tx_context.erase("show_part_of_inputs");
     tx_context.erase("show_more_details_link");
     tx_context.erase("max_no_of_inputs_to_show");
-    tx_context.erase("inputs_xla_sum_not_zero");
+    tx_context.erase("inputs_lfi_sum_not_zero");
     tx_context.erase("have_raw_tx");
     tx_context.erase("have_any_unknown_amount");
     tx_context.erase("has_error");
@@ -5379,7 +5379,7 @@ json_outputs(string tx_hash_str,
 
         // get the tx output public key
         // that normally would be generated for us,
-        // if someone had sent us some xla.
+        // if someone had sent us some lfi.
         public_key tx_pubkey;
 
         derive_public_key(derivation,
@@ -5400,7 +5400,7 @@ json_outputs(string tx_hash_str,
             with_additional = true;
         }
 
-        uint64_t xla_amount  = std::get<1>(outp);
+        uint64_t lfi_amount  = std::get<1>(outp);
 
         // if mine output has RingCT, i.e., tx version is 2
         if (mine_output && tx.version == 2)
@@ -5429,7 +5429,7 @@ json_outputs(string tx_hash_str,
                     cerr << "\nshow_my_outputs: Cant decode ringCT! " << endl;
                 }
 
-                xla_amount         = rct_amount;
+                lfi_amount         = rct_amount;
                 money_transfered[output_idx] = rct_amount;
 
             } // if (!is_coinbase(tx))
@@ -5438,7 +5438,7 @@ json_outputs(string tx_hash_str,
 
         j_outptus.push_back(json {
                 {"output_pubkey", pod_to_hex(std::get<0>(outp))},
-                {"amount"       , xla_amount},
+                {"amount"       , lfi_amount},
                 {"match"        , mine_output},
                 {"output_idx"   , output_idx},
         });
@@ -5732,8 +5732,8 @@ json_emission()
                 = CurrentBlockchainStatus::get_emission();
 
         string emission_blk_no   = std::to_string(current_values.blk_no - 1);
-        string emission_coinbase = xla_amount_to_str(current_values.coinbase, "{:0.3f}");
-        string emission_fee      = xla_amount_to_str(current_values.fee, "{:0.4f}", false);
+        string emission_coinbase = lfi_amount_to_str(current_values.coinbase, "{:0.3f}");
+        string emission_fee      = lfi_amount_to_str(current_values.fee, "{:0.4f}", false);
 
         j_data = json {
                 {"blk_no"  , current_values.blk_no - 1},
@@ -5858,7 +5858,7 @@ find_our_outputs(
 
             // get the tx output public key
             // that normally would be generated for us,
-            // if someone had sent us some xla.
+            // if someone had sent us some lfi.
             public_key tx_pubkey;
 
             derive_public_key(derivation,
@@ -5879,7 +5879,7 @@ find_our_outputs(
                 with_additional = true;
             }
 
-            uint64_t xla_amount = std::get<1>(outp);
+            uint64_t lfi_amount = std::get<1>(outp);
 
             // if mine output has RingCT, i.e., tx version is 2
             if (mine_output && tx.version == 2)
@@ -5912,7 +5912,7 @@ find_our_outputs(
                         return false;
                     }
 
-                    xla_amount = rct_amount;
+                    lfi_amount = rct_amount;
                     money_transfered[output_idx] = rct_amount;
 
                 } // if (!is_coinbase(tx))
@@ -5925,7 +5925,7 @@ find_our_outputs(
 
                 j_outptus.push_back(json {
                         {"output_pubkey" , pod_to_hex(std::get<0>(outp))},
-                        {"amount"        , xla_amount},
+                        {"amount"        , lfi_amount},
                         {"block_no"      , block_no},
                         {"in_mempool"    , is_mempool},
                         {"output_idx"    , output_idx},
@@ -5952,8 +5952,8 @@ get_tx_json(const transaction& tx, const tx_details& txd)
             {"tx_fee"      , txd.fee},
             {"mixin"       , txd.mixin_no},
             {"tx_size"     , txd.size},
-            {"xla_outputs" , txd.xla_outputs},
-            {"xla_inputs"  , txd.xla_inputs},
+            {"lfi_outputs" , txd.lfi_outputs},
+            {"lfi_inputs"  , txd.lfi_inputs},
             {"tx_version"  , static_cast<uint64_t>(txd.version)},
             {"rct_type"    , tx.rct_signatures.type},
             {"coinbase"    , is_coinbase(tx)},
@@ -6109,8 +6109,8 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
             {"blk_height"            , tx_blk_height_str},
             {"tx_blk_height"         , tx_blk_height},
             {"tx_size"               , fmt::format("{:0.4f}", tx_size)},
-            {"tx_fee"                , lfieg::xla_amount_to_str(txd.fee, "{:0.12f}", false)},
-            {"tx_fee_micro"          , lfieg::xla_amount_to_str(txd.fee*1e6, "{:0.4f}", false)},
+            {"tx_fee"                , lfieg::lfi_amount_to_str(txd.fee, "{:0.12f}", false)},
+            {"tx_fee_micro"          , lfieg::lfi_amount_to_str(txd.fee*1e6, "{:0.4f}", false)},
             {"payed_for_kB"          , fmt::format("{:0.12f}", payed_for_kB)},
             {"tx_version"            , static_cast<uint64_t>(txd.version)},
             {"blk_timestamp"         , blk_timestamp},
@@ -6157,7 +6157,7 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
 
     uint64_t input_idx {0};
 
-    uint64_t inputs_xla_sum {0};
+    uint64_t inputs_lfi_sum {0};
 
     // ringct inputs can be mixture of known amounts (when old outputs)
     // are spent, and unknown umounts (makrked in explorer by '?') when
@@ -6237,7 +6237,7 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
 
         inputs.push_back(mstch::map {
                 {"in_key_img"   , pod_to_hex(in_key.k_image)},
-                {"amount"       , lfieg::xla_amount_to_str(in_key.amount)},
+                {"amount"       , lfieg::lfi_amount_to_str(in_key.amount)},
                 {"input_idx"    , fmt::format("{:02d}", input_idx)},
                 {"mixins"       , mstch::array{}},
                 {"ring_sigs"    , mstch::array{}},
@@ -6251,7 +6251,7 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
         }
 
 
-        inputs_xla_sum += in_key.amount;
+        inputs_lfi_sum += in_key.amount;
 
         if (in_key.amount == 0)
         {
@@ -6402,8 +6402,8 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
 
 
     context["have_any_unknown_amount"]  = have_any_unknown_amount;
-    context["inputs_xla_sum_not_zero"]  = (inputs_xla_sum > 0);
-    context["inputs_xla_sum"]           = lfieg::xla_amount_to_str(inputs_xla_sum);
+    context["inputs_lfi_sum_not_zero"]  = (inputs_lfi_sum > 0);
+    context["inputs_lfi_sum"]           = lfieg::lfi_amount_to_str(inputs_lfi_sum);
     context["server_time"]              = server_time_str;
     context["enable_mixins_details"]    = detailed_view;
     context["enable_as_hex"]            = enable_as_hex;
@@ -6444,7 +6444,7 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
 
     mstch::array outputs;
 
-    uint64_t outputs_xla_sum {0};
+    uint64_t outputs_lfi_sum {0};
 
     for (output_tuple_with_tag& outp: txd.output_pub_keys)
     {
@@ -6463,7 +6463,7 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
                     = std::to_string(out_amount_indices.at(output_idx));
         }
 
-        outputs_xla_sum += std::get<1>(outp);
+        outputs_lfi_sum += std::get<1>(outp);
 
         std::stringstream ss;
         if (std::get<2>(outp)) {
@@ -6477,7 +6477,7 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
 
         outputs.push_back(mstch::map {
                 {"out_pub_key"           , pod_to_hex(std::get<0>(outp))},
-                {"amount"                , lfieg::xla_amount_to_str(std::get<1>(outp))},
+                {"amount"                , lfieg::lfi_amount_to_str(std::get<1>(outp))},
                 {"amount_idx"            , out_amount_index_str},
                 {"num_outputs"           , num_outputs_amount},
                 {"output_tag"            , view_tag_str},
@@ -6487,7 +6487,7 @@ construct_tx_context(transaction tx, uint16_t with_ring_signatures = 0)
 
     } //  for (pair<public_key, uint64_t>& outp: txd.output_pub_keys)
 
-    context["outputs_xla_sum"] = lfieg::xla_amount_to_str(outputs_xla_sum);
+    context["outputs_lfi_sum"] = lfieg::lfi_amount_to_str(outputs_lfi_sum);
 
     context.emplace("outputs", outputs);
 
@@ -6577,12 +6577,12 @@ get_tx_details(const transaction& tx,
     txd.additional_pks = cryptonote::get_additional_tx_pub_keys_from_extra(tx);
 
 
-    // sum xla in inputs and ouputs in the given tx
+    // sum lfi in inputs and ouputs in the given tx
     const array<uint64_t, 4>& sum_data = summary_of_in_out_rct(
             tx, txd.output_pub_keys, txd.input_key_imgs);
 
-    txd.xla_outputs       = sum_data[0];
-    txd.xla_inputs        = sum_data[1];
+    txd.lfi_outputs       = sum_data[0];
+    txd.lfi_inputs        = sum_data[1];
     txd.mixin_no          = sum_data[2];
     txd.num_nonrct_inputs = sum_data[3];
 
