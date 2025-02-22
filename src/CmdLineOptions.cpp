@@ -71,7 +71,7 @@ namespace lfieg
                  "path to key file for ssl (https) functionality")
                 ("daemon-login", value<string>(),
                  "Specify username[:password] for daemon RPC client")
-                ("daemon-url,d", value<string>()->default_value("127.0.0.1:18081"),
+                ("daemon-url,d", value<string>()->default_value("127.0.0.1:25252"),
                  "Lunify daemon url")
                 ("enable-mixin-guess", value<bool>()->default_value(false)->implicit_value(true),
                  "enable guessing real outputs in key images based on viewkey");

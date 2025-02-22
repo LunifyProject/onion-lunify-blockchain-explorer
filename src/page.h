@@ -2140,9 +2140,6 @@ show_my_outputs(string tx_hash_str,
                                  tx_prove ? multiple_tx_secret_keys[0] : prv_view_key,
                                  derivation))
     {
-        cerr << "Cant get derived key for: "  << "\n"
-             << "pub_tx_key: " << pub_key << " and "
-             << "prv_view_key" << prv_view_key << endl;
 
         return string("Cant get key_derivation");
     }
@@ -2153,9 +2150,6 @@ show_my_outputs(string tx_hash_str,
                                      tx_prove ? multiple_tx_secret_keys[i + 1] : prv_view_key,
                                      additional_derivations[i]))
         {
-            cerr << "Cant get derived key for: "  << "\n"
-                 << "pub_tx_key: " << txd.additional_pks[i] << " and "
-                 << "prv_view_key" << prv_view_key << endl;
 
             return string("Cant get key_derivation");
         }
@@ -2456,9 +2450,6 @@ show_my_outputs(string tx_hash_str,
                 if (!generate_key_derivation(mixin_tx_pub_key,
                                              prv_view_key, derivation))
                 {
-                    cerr << "Cant get derived key for: "  << "\n"
-                         << "pub_tx_key: " << mixin_tx_pub_key << " and "
-                         << "prv_view_key" << prv_view_key << endl;
 
                     continue;
                 }
@@ -2468,9 +2459,6 @@ show_my_outputs(string tx_hash_str,
                                                  prv_view_key,
                                                  additional_derivations[i]))
                     {
-                        cerr << "Cant get derived key for: "  << "\n"
-                             << "pub_tx_key: " << mixin_additional_tx_pub_keys[i]
-                             << " and prv_view_key" << prv_view_key << endl;
 
                         continue;
                     }
@@ -3185,8 +3173,6 @@ show_checkrawtx(string raw_tx_data, string action)
                 return boost::get<string>(tx_context["error_msg"]);
             }
 
-            tx_context["tx_prv_key"] =  fmt::format("{:s}", ptx.tx_key);
-
             mstch::array destination_addresses;
             vector<uint64_t> real_ammounts;
             uint64_t outputs_xla_sum {0};
@@ -3735,8 +3721,6 @@ show_checkrawkeyimgs(string raw_data, string viewkey_str)
 
     context.insert({"address"        , REMOVE_HASH_BRAKETS(
             lfieg::print_address(address_info, nettype))});
-    context.insert({"viewkey"        , REMOVE_HASH_BRAKETS(
-            fmt::format("{:s}", prv_view_key))});
     context.insert({"has_total_xla"  , false});
     context.insert({"total_xla"      , string{}});
     context.insert({"key_imgs"       , mstch::array{}});
@@ -3869,7 +3853,7 @@ show_checkcheckrawoutput(string raw_data, string viewkey_str)
 
     context.insert({"address"        , REMOVE_HASH_BRAKETS(
             lfieg::print_address(address_info, nettype))});
-    context.insert({"viewkey"        , pod_to_hex(prv_view_key)});
+    context.insert({"viewkey"        , pod_to_hex(unwrap(unwrap(prv_view_key)))});
     context.insert({"has_total_xla"  , false});
     context.insert({"total_xla"      , string{}});
     context.insert({"output_keys"    , mstch::array{}});
@@ -5476,7 +5460,7 @@ json_outputs(string tx_hash_str,
     // matches to what was used to produce response.
     j_data["tx_hash"]  = pod_to_hex(txd.hash);
     j_data["address"]  = pod_to_hex(address_info.address);
-    j_data["viewkey"]  = pod_to_hex(prv_view_key);
+    j_data["viewkey"]  = pod_to_hex(unwrap(unwrap(prv_view_key)));
     j_data["tx_prove"] = tx_prove;
     j_data["tx_confirmations"] = txd.no_confirmations;
     j_data["tx_timestamp"] = tx_timestamp;
@@ -5660,7 +5644,7 @@ json_outputsblocks(string _limit,
     // check if submited data in the request
     // matches to what was used to produce response.
     j_data["address"]  = pod_to_hex(address_info.address);
-    j_data["viewkey"]  = pod_to_hex(prv_view_key);
+    j_data["viewkey"]  = pod_to_hex(unwrap(unwrap(prv_view_key)));
     j_data["limit"]    = _limit;
     j_data["height"]   = height;
     j_data["mempool"]  = in_mempool_aswell;

@@ -239,7 +239,7 @@ xlablocks, Onion Lunify Blockchain Explorer:
                                         functionality
   --ssl-key-file arg                    path to key file for ssl (https)
                                         functionality
-  -d [ --daemon-url ] arg (=http:://127.0.0.1:18081)
+  -d [ --daemon-url ] arg (=http:://127.0.0.1:25252)
                                         Lunify daemon url
   --daemon-login arg                    Specify username[:password] for daemon 
                                         RPC client
