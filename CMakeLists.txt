@@ -32,7 +32,7 @@ if (NOT LUNIFY_BUILD_DIR)
    if (NOT EXISTS ${LUNIFY_BUILD_DIR})   
         # try different location   
         message(STATUS "Trying different folder for Lunify libraries")
-        set(LUNIFY_BUILD_DIR ${LUNIFY_SOURCE_DIR}/build/Linux/master/release/
+        set(LUNIFY_BUILD_DIR ${LUNIFY_SOURCE_DIR}/build/Linux/main/release/
             CACHE PATH "Path to the build directory for Lunify" FORCE)
     endif()
 
